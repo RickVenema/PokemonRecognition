@@ -14,23 +14,22 @@ class DataLoader:
         return csv_data
 
     def load_image_folder(self):
-        image_loc = self.data_loc + "/images/images/"
+        image_loc = self.data_loc + "images/images/"
         train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
             rescale=1. / 255,
             shear_range=0.2,
             zoom_range=0.2,
             horizontal_flip=True)
         test_datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1. / 255)
-
         train_generator = train_datagen.flow_from_directory(
             image_loc,
-            target_size=(120, 120),
+            target_size=(150, 150),
             batch_size=32,
-            class_mode='binary')
+            class_mode='categorical')
         validation_generator = test_datagen.flow_from_directory(
             image_loc,
-            target_size=(120, 120),
+            target_size=(150, 150),
             batch_size=32,
-            class_mode='binary')
+            class_mode='categorical')
 
         return train_generator, validation_generator

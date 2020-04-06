@@ -3,7 +3,7 @@ import data_loader
 
 
 def main():
-    data = data_loader.DataLoader("pokemon-images-and-types/")
+    data = data_loader.DataLoader("pokemonclassification/")
     nn = main_net.Network(data)
     nn.train()
     # print(nn)

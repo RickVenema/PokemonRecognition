@@ -5,8 +5,8 @@ from data_loader import DataLoader
 
 class Network:
     def __init__(self, train_data):
-        self.model = self.create_model()
         self.data = train_data
+        self.model = self.create_model()
 
     def __str__(self):
         return f"""
@@ -14,25 +14,39 @@ class Network:
         {self.model.summary()}
         """
 
-    @staticmethod
-    def create_model():
-        model = tf.keras.Sequential([
-            tf.keras.layers.Flatten(input_shape=(120, 120)),
-            tf.keras.layers.Dense(4096),
-            tf.keras.layers.Dense(4096),
-            tf.keras.layers.Dense(4096),
-            tf.keras.layers.Dense(18)
-        ])
-        model.compile(optimizer='adam',
-                      loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
+    def create_model(self):
+        model = tf.keras.Sequential()
+        model.add(tf.keras.layers.Conv2D(256, (3, 3), input_shape=self.data.X.shape[1:], activation='relu'))
+        # model.add(tf.keras.layers.Activation('relu'))
+        model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(tf.keras.layers.Conv2D(128, (3, 3), activation='relu'))
+        # model.add(tf.keras.layers.Activation('relu'))
+        model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(tf.keras.layers.Conv2D(64, (3, 3), activation="relu"))
+        # model.add(tf.keras.layers.Activation('relu'))
+        model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(tf.keras.layers.Conv2D(32, (3, 3), activation="relu"))
+        # model.add(tf.keras.layers.Activation('relu'))
+        model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(tf.keras.layers.Flatten())  # this converts our 3D feature maps to 1D feature vectors
+        model.add(tf.keras.layers.Dropout(0.2))
+
+        model.add(tf.keras.layers.Dense(1024, activation="relu"))
+        model.add(tf.keras.layers.Dense(512, activation="relu"))
+        # model.add(tf.keras.layers.Dense(256, activation="relu"))
+
+        model.add(tf.keras.layers.Dense(150, activation="softmax"))
+
+        model.compile(loss='sparse_categorical_crossentropy',
+                      optimizer='adam',
                       metrics=['accuracy'])
+        print(model)
         return model
 
     def train(self):
-        self.model.fit_generator(
-            self.data.train_data,
-            steps_per_epoch=2000,
-            epochs=50,
-            validation_data=self.data.validation,
-            validation_steps=800)
+        self.model.fit(self.data.X, self.data.y, batch_size=32, epochs=30, validation_split=0.3)
 
